@@ -1,0 +1,24 @@
+{
+  "name": "dawn-main",
+  "version": "1.0.0",
+  "description": "[![Build status](https://github.com/shopify/dawn/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Shopify/dawn/actions/workflows/ci.yml?query=branch%3Amain) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?color=informational)](/.github/CONTRIBUTING.md)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/son-lhs/theme-training-v1.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/son-lhs/theme-training-v1/issues"
+  },
+  "homepage": "https://github.com/son-lhs/theme-training-v1#readme",
+  "devDependencies": {
+    "@shopify/prettier-plugin-liquid": "^1.10.0",
+    "tailwindcss": "^4.1.17"
+  }
+}
