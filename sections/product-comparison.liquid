@@ -1,0 +1,423 @@
+{%- assign products_to_compare = section.settings.products | where: 'available', true -%}
+{%- assign max_products = section.settings.limit_products | default: 5 -%}
+{%- assign products_to_compare = products_to_compare | slice: 0, max_products -%}
+{%- assign heading_color = section.settings.color_heading -%}
+{%- assign subheading_color = section.settings.color_subheading -%}
+{%- assign align = section.settings.heading_alignment -%}
+
+{%- if products_to_compare.size > 0 -%}
+  <div class="product-comparison" data-section-id="{{ section.id }}">
+    <div class="text-{{ align }}">
+      <h2 class="text-4xl" style="color: {{ heading_color }};">
+        {{ section.settings.heading }}
+      </h2>
+
+      <h3 class="text-2xl" style="color: {{ subheading_color }};">
+        {{ section.settings.sub_heading }}
+      </h3>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th class="product-comparison-header-cell !bg-white w-[233px]">
+            <div class="w-[233px] h-[233px] bg-white"></div>
+          </th>
+
+          {% for product in products_to_compare %}
+            <th
+              class="product-comparison-product-cell !bg-[#F5F5F5] text-center p-0 border border-[rgba(0,0,0,0.12)]"
+              style="vertical-align: top;"
+            >
+              <div class="flex flex-col items-center">
+                <div class="w-[233px] h-[233px] bg-white p-16 flex items-center justify-center overflow-hidden rounded-xl">
+                  <img
+                    src="{{ product.featured_image | image_url: width: 233 }}"
+                    alt="{{ product.title }}"
+                    class="w-[233px] h-auto object-contain"
+                    loading="lazy"
+                  >
+                </div>
+
+                <div class="text-left w-[233px]">
+                  <div class="font-semibold text-2xl mb-1 mt-2 break-words">
+                    {{ product.title }}
+                  </div>
+                  <div class="font-bold text-2xl">
+                    {{ product.price | money }}
+                  </div>
+                </div>
+              </div>
+            </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for block in section.blocks %}
+          <tr class="align-top">
+            <th class="bg-white w-[280px] p-3 text-left align-top">
+              {% case block.type %}
+                {% when 'description' %}
+                  {{ block.settings.description_title }}
+                {% when 'inventory_status' %}
+                  {{ block.settings.inventory_status_title }}
+                {% when 'vendor' %}
+                  {{ block.settings.vendor_title }}
+                {% when 'variant_option' %}
+                  {{ block.settings.variant_option_title }}
+                {% when 'sku' %}
+                  {{ block.settings.sku_title }}
+                {% when 'product_metafield' %}
+                  {{ block.settings.product_metafield_title }}
+                {% else %}
+                  {{ block.type | capitalize }}
+              {% endcase %}
+            </th>
+
+            {% for product in products_to_compare %}
+              <td class="bg-[#F5F5F5] w-[280px] p-3 align-top break-words">
+                {%- case block.type -%}
+                  {%- when 'description' -%}
+                    {%- if product.description != blank -%}
+                      {{- product.description | strip_html | truncatewords: 15 -}}
+                    {%- else -%}
+                      {{- section.settings.empty_field_text -}}
+                    {%- endif -%}
+
+                  {%- when 'inventory_status' -%}
+                    {%- if product.available -%}
+                      {{ 'products.product.inventory_in_stock' | t }}
+                    {%- else -%}
+                      {{ 'products.product.inventory_out_of_stock' | t }}
+                    {%- endif -%}
+
+                  {%- when 'vendor' -%}
+                    {%- if product.vendor != blank -%}
+                      {{- product.vendor -}}
+                    {%- else -%}
+                      {{- section.settings.empty_field_text -}}
+                    {%- endif -%}
+
+                  {%- when 'sku' -%}
+                    {%- assign variant = product.selected_or_first_available_variant -%}
+                    {%- if variant.sku != blank -%}
+                      {{- variant.sku -}}
+                    {%- else -%}
+                      {{- section.settings.empty_field_text -}}
+                    {%- endif -%}
+
+                  {%- when 'product_metafield' -%}
+                    {%- assign metafield_key = block.settings.metafield_key -%}
+                    {%- assign parts = metafield_key | split: '.' -%}
+                    {%- if parts.size == 2 -%}
+                      {%- assign namespace = parts[0] -%}
+                      {%- assign key = parts[1] -%}
+                      {%- assign meta_value = product.metafields[namespace][key] -%}
+                      {%- if meta_value.value != blank -%}
+                        {{- meta_value.value -}}
+                      {%- else -%}
+                        {{- section.settings.empty_field_text -}}
+                      {%- endif -%}
+                    {%- else -%}
+                      {{- section.settings.empty_field_text -}}
+                    {%- endif -%}
+
+                  {%- when 'variant_option' -%}
+                    {%- assign option_name = block.settings.variant_option_title -%}
+                    {%- assign found_option = false -%}
+                    {%- for option in product.options_with_values -%}
+                      {%- if option.name == option_name -%}
+                        {{- option.values | join: ', ' -}}
+                        {%- assign found_option = true -%}
+                        {%- break -%}
+                      {%- endif -%}
+                    {%- endfor -%}
+                    {%- unless found_option -%}
+                      {{- section.settings.empty_field_text -}}
+                    {%- endunless -%}
+
+                  {%- else -%}
+                    {{- section.settings.empty_field_text -}}
+                {%- endcase -%}
+              </td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th class="bg-white w-[280px]"></th>
+
+          {% for product in products_to_compare %}
+            {%- assign variant = product.selected_or_first_available_variant -%}
+            <td class="w-[280px] bg-white p-3 text-center align-top space-y-2">
+              <product-form data-section-id="{{ section.id }}">
+                {%- form 'product',
+                  product,
+                  id: product.id,
+                  class: 'form',
+                  novalidate: 'novalidate',
+                  data-type: 'add-to-cart-form'
+                -%}
+                  <input type="hidden" name="id" value="{{ variant.id }}">
+                  <input type="hidden" name="quantity" value="1">
+
+                  <button
+                    id="ProductSubmitButton-{{ section.id }}"
+                    type="submit"
+                    name="add"
+                    class="w-full focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-xl px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                    {% unless variant.available %}
+                      disabled
+                    {% endunless %}
+                  >
+                    <span>
+                      {%- if product.selected_or_first_available_variant == null -%}
+                        {{ 'products.product.unavailable' | t }}
+                      {%- elsif product.selected_or_first_available_variant.available == false -%}
+                        {{ 'products.product.sold_out' | t }}
+                      {%- else -%}
+                        {{ 'products.product.add_to_cart' | t }}
+                      {%- endif -%}
+                    </span>
+                  </button>
+                {%- endform -%}
+              </product-form>
+              <a href="{{ product.url }}" class="underline text-xl block"> View Detail </a>
+            </td>
+          {% endfor %}
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Product comparison",
+  "class": "overlay-section",
+  "limit": 1,
+  "settings": [
+    {
+      "type": "text",
+      "id": "sub_heading",
+      "label": "Subheading",
+      "default": "Subheading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Product comparison"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left",
+      "label": "Heading alignment"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Describe you product comparison grid.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Grid"
+    },
+    {
+      "type": "product_list",
+      "id": "products",
+      "limit": 5,
+      "label": "Select products"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collections"
+    },
+    {
+      "type": "text",
+      "id": "empty_field_text",
+      "label": "Text to use for empty fields",
+      "default": "\"-\""
+    },
+    {
+      "type": "range",
+      "min": 1,
+      "max": 5,
+      "id": "limit_products",
+      "label": "Limit product to shows",
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Section layout"
+    },
+    {
+      "type": "range",
+      "min": 0,
+      "max": 100,
+      "id": "desktop_padding_top",
+      "label": "Desktop padding top",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "min": 0,
+      "max": 100,
+      "id": "desktop_padding_bottom",
+      "label": "Desktop padding bottom",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "min": 0,
+      "max": 100,
+      "id": "mobile_padding_top",
+      "label": "Mobile padding top",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "min": 0,
+      "max": 100,
+      "id": "mobile_padding_bottom",
+      "label": "Mobile padding bottom",
+      "default": 28
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "color_heading",
+      "label": "Color heading"
+    },
+    {
+      "type": "color",
+      "id": "color_subheading",
+      "label": "Color subheading"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Color text"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "description",
+      "name": "Product description",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "description_title",
+          "label": "Title",
+          "default": "Description"
+        }
+      ]
+    },
+    {
+      "type": "inventory_status",
+      "name": "Inventory Status",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "inventory_status_title",
+          "label": "Title",
+          "default": "Inventory Status"
+        }
+      ]
+    },
+    {
+      "type": "vendor",
+      "name": "Vendor name",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "vendor_title",
+          "label": "Title",
+          "default": "Vendor"
+        }
+      ]
+    },
+    {
+      "type": "variant_option",
+      "name": "Variant option",
+      "settings": [
+        {
+          "type": "text",
+          "id": "variant_option_title",
+          "label": "Title",
+          "default": "Color",
+          "info": "This should be the name of the variant option, such as 'Color'."
+        }
+      ]
+    },
+    {
+      "type": "sku",
+      "name": "SKU",
+      "settings": [
+        {
+          "type": "text",
+          "id": "sku_title",
+          "label": "Title",
+          "default": "SKU"
+        }
+      ]
+    },
+    {
+      "type": "product_metafield",
+      "name": "Product metafield",
+      "settings": [
+        {
+          "type": "text",
+          "id": "product_metafield_title",
+          "label": "Title",
+          "default": "Customizable title"
+        },
+        {
+          "type": "text",
+          "id": "metafield_key",
+          "label": "Metafield key",
+          "info": "Enter a product metafield key. For example: custom.use_conditions"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product comparison",
+      "category": "Product",
+      "blocks": [
+        {
+          "type": "description"
+        },
+        {
+          "type": "vendor"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
