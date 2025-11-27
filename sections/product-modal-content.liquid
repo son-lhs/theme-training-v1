@@ -1,0 +1,138 @@
+{{ 'section-main-product.css' | asset_url | stylesheet_tag }}
+{{ 'component-accordion.css' | asset_url | stylesheet_tag }}
+{{ 'component-price.css' | asset_url | stylesheet_tag }}
+{{ 'component-slider.css' | asset_url | stylesheet_tag }}
+{{ 'component-rating.css' | asset_url | stylesheet_tag }}
+{{ 'component-deferred-media.css' | asset_url | stylesheet_tag }}
+
+{% unless product.has_only_default_variant %}
+  {{ 'component-product-variant-picker.css' | asset_url | stylesheet_tag }}
+  {{ 'component-swatch-input.css' | asset_url | stylesheet_tag }}
+  {{ 'component-swatch.css' | asset_url | stylesheet_tag }}
+{% endunless %}
+
+{%- if product.quantity_price_breaks_configured? -%}
+  {{ 'component-volume-pricing.css' | asset_url | stylesheet_tag }}
+{%- endif -%}
+
+<script src="{{ 'product-info.js' | asset_url }}" defer></script>
+<script src="{{ 'product-form.js' | asset_url }}" defer></script>
+{%- if product.quantity_price_breaks_configured? -%}
+  <script src="{{ 'show-more.js' | asset_url }}" defer></script>
+  <script src="{{ 'price-per-item.js' | asset_url }}" defer></script>
+{%- endif -%}
+
+{%- assign first_3d_model = product.media | where: 'media_type', 'model' | first -%}
+{%- if first_3d_model -%}
+  {{ 'component-product-model.css' | asset_url | stylesheet_tag }}
+  <link
+    id="ModelViewerStyle"
+    rel="stylesheet"
+    href="https://cdn.shopify.com/shopifycloud/model-viewer-ui/assets/v1.0/model-viewer-ui.css"
+    media="print"
+    onload="this.media='all'"
+  >
+  <link
+    id="ModelViewerOverride"
+    rel="stylesheet"
+    href="{{ 'component-model-viewer-ui.css' | asset_url }}"
+    media="print"
+    onload="this.media='all'"
+  >
+{%- endif -%}
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto p-4">
+  <div class="flex justify-center">
+    <div class="w-full max-w-xs">
+      <img
+        src="{{ product.featured_image | image_url: width: 400 }}"
+        alt="{{ product.title | escape }}"
+        class="w-full h-auto object-contain"
+        loading="lazy"
+      >
+    </div>
+  </div>
+
+  <div class="space-y-4">
+    <section class="product__info-container">
+      {%- assign product_form_id = 'product-form-modal' -%}
+
+      <h1 class="product__title">{{ product.title | escape }}</h1>
+
+      <div id="price-modal" role="status">
+        {%- render 'price', product: product, use_variant: true, show_badges: true, price_class: 'price--large' -%}
+      </div>
+
+      {%- if product.quantity_price_breaks_configured? -%}
+        <div class="volume-pricing-note" id="Volume-Note-modal">
+          <span>{{ 'products.product.volume_pricing.note' | t }}</span>
+        </div>
+      {%- endif -%}
+
+      {%- assign inventory_block = section.blocks | where: 'type', 'inventory' | first -%}
+      {%- if inventory_block != blank
+        and product.selected_or_first_available_variant.inventory_management == 'shopify'
+      -%}
+        <p class="product__inventory" id="Inventory-modal" role="status">
+          {%- if product.selected_or_first_available_variant.inventory_quantity > 0 -%}
+            {% if product.selected_or_first_available_variant.inventory_quantity
+                <= inventory_block.settings.inventory_threshold
+            %}
+              <span class="low-inventory">{{ 'products.product.inventory_low_stock' | t }}</span>
+            {% else %}
+              {{ 'products.product.inventory_in_stock' | t }}
+            {% endif %}
+          {%- else -%}
+            {{ 'products.product.inventory_out_of_stock' | t }}
+          {%- endif -%}
+        </p>
+      {%- endif -%}
+
+      <product-form>
+        {%- form 'product', product, id: product_form_id, class: 'form', novalidate: 'novalidate' -%}
+          <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+          <input type="hidden" name="quantity" value="1">
+
+          <div class="price-per-item__container">
+            <quantity-input class="quantity" data-url="{{ product.url }}" data-section="modal">
+              <button class="quantity__button" name="minus" type="button">
+                <span class="visually-hidden">{{ 'products.product.quantity.decrease' | t }}</span>
+                <span class="svg-wrapper">{{ 'icon-minus.svg' | inline_asset_content }}</span>
+              </button>
+              <input
+                class="quantity__input"
+                type="number"
+                name="quantity"
+                value="1"
+                min="{{ product.selected_or_first_available_variant.quantity_rule.min }}"
+                {% if product.selected_or_first_available_variant.quantity_rule.max != null %}
+                  max="{{ product.selected_or_first_available_variant.quantity_rule.max }}"
+                {% endif %}
+                step="{{ product.selected_or_first_available_variant.quantity_rule.increment }}"
+              >
+              <button class="quantity__button" name="plus" type="button">
+                <span class="visually-hidden">{{ 'products.product.quantity.increase' | t }}</span>
+                <span class="svg-wrapper">{{ 'icon-plus.svg' | inline_asset_content }}</span>
+              </button>
+            </quantity-input>
+          </div>
+
+          <button
+            type="submit"
+            name="add"
+            class="product-form__submit button button--secondary w-full mt-4"
+          >
+            {{ 'products.product.add_to_cart' | t }}
+          </button>
+          {{ form | payment_button }}
+        {%- endform -%}
+      </product-form>
+
+      {%- if product.description != blank -%}
+        <div class="product__description text-left">
+          {{ product.description }}
+        </div>
+      {%- endif -%}
+    </section>
+  </div>
+</div>

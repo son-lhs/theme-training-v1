@@ -34,6 +34,7 @@
     <script src="{{ 'details-disclosure.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'details-modal.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'search-form.js' | asset_url }}" defer="defer"></script>
+    <script src="{{ 'custom-add-cart.js' | asset_url }}" defer="defer"></script>
 
     {%- if settings.animations_reveal_on_scroll -%}
       <script src="{{ 'animations.js' | asset_url }}" defer="defer"></script>
@@ -298,6 +299,12 @@
       }
     </script>
     <script src="{{ 'alpine.min.js' | asset_url  }}" defer="defer"></script>
+    <script src="{{ 'alpine.js' | asset_url  }}" defer="defer"></script>
+    <style>
+      [x-cloak] {
+        display: none !important;
+      }
+    </style>
   </head>
 
   <body class="gradient{% if settings.animations_hover_elements != 'none' %} animate--hover-{{ settings.animations_hover_elements }}{% endif %}">
@@ -310,7 +317,6 @@
     {%- endif -%}
 
     {% sections 'header-group' %}
-
     <main id="MainContent" class="content-for-layout focus-none" role="main" tabindex="-1">
       {{ content_for_layout }}
     </main>

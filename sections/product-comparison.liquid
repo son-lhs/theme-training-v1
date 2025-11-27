@@ -7,7 +7,7 @@
 
 {%- if products_to_compare.size > 0 -%}
   <div class="product-comparison" data-section-id="{{ section.id }}">
-    <div class="text-{{ align }}">
+    <div class="ml-4 text-{{ align }}">
       <h2 class="text-4xl" style="color: {{ heading_color }};">
         {{ section.settings.heading }}
       </h2>
@@ -17,7 +17,7 @@
       </h3>
     </div>
 
-    <table>
+    <table style="margin: auto;">
       <thead>
         <tr>
           <th class="product-comparison-header-cell !bg-white w-[233px]">
@@ -26,10 +26,10 @@
 
           {% for product in products_to_compare %}
             <th
-              class="product-comparison-product-cell !bg-[#F5F5F5] text-center p-0 border border-[rgba(0,0,0,0.12)]"
+              class="product-comparison-product-cell !bg-[#F5F5F5] text-center p-0"
               style="vertical-align: top;"
             >
-              <div class="flex flex-col items-center">
+              <div class="flex flex-col items-center my-5">
                 <div class="w-[233px] h-[233px] bg-white p-16 flex items-center justify-center overflow-hidden rounded-xl">
                   <img
                     src="{{ product.featured_image | image_url: width: 233 }}"
@@ -151,39 +151,38 @@
           {% for product in products_to_compare %}
             {%- assign variant = product.selected_or_first_available_variant -%}
             <td class="w-[280px] bg-white p-3 text-center align-top space-y-2">
-              <product-form data-section-id="{{ section.id }}">
-                {%- form 'product',
-                  product,
-                  id: product.id,
-                  class: 'form',
-                  novalidate: 'novalidate',
-                  data-type: 'add-to-cart-form'
-                -%}
-                  <input type="hidden" name="id" value="{{ variant.id }}">
+              <div x-data="customAddToCartForm({{ product.id }}, {{ variant.id }}, {{ variant.available | json }})">
+                {%- form 'product', product, id: product.id, class: 'form', novalidate: 'novalidate' -%}
+                  <input type="hidden" name="id" x-bind:value="selectedVariantId">
                   <input type="hidden" name="quantity" value="1">
 
                   <button
-                    id="ProductSubmitButton-{{ section.id }}"
                     type="submit"
-                    name="add"
-                    class="w-full focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-xl px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-                    {% unless variant.available %}
-                      disabled
-                    {% endunless %}
+                    @click.prevent="submitCart($el.closest('form'))"
+                    x-bind:disabled="loading || !variantAvailable"
+                    class="
+                      w-full text-white font-medium rounded-lg text-xl px-5 py-2.5 mb-2
+                      bg-green-700 hover:bg-green-800
+                      disabled:bg-gray-400 disabled:text-white disabled:cursor-not-allowed
+                    "
                   >
-                    <span>
-                      {%- if product.selected_or_first_available_variant == null -%}
-                        {{ 'products.product.unavailable' | t }}
-                      {%- elsif product.selected_or_first_available_variant.available == false -%}
+                    <span x-show="!soldOutMessage && !loading">
+                      {% if variant == null or variant.available == false %}
                         {{ 'products.product.sold_out' | t }}
-                      {%- else -%}
+                      {% else %}
                         {{ 'products.product.add_to_cart' | t }}
-                      {%- endif -%}
+                      {% endif %}
                     </span>
+                    <span x-show="soldOutMessage" x-text="soldOutMessage"></span>
+                    <span x-show="loading">Adding...</span>
                   </button>
                 {%- endform -%}
-              </product-form>
-              <a href="{{ product.url }}" class="underline text-xl block"> View Detail </a>
+
+                <div x-show="errorMessage" class="text-red-600 text-sm mt-1" x-text="errorMessage"></div>
+
+                {% comment %} modal view detail {% endcomment %}
+              </div>
+              {% render 'product-comparison-detail-modal', product: product, section: section, cart: cart %}
             </td>
           {% endfor %}
         </tr>
