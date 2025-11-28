@@ -6,7 +6,7 @@
 {%- assign align = section.settings.heading_alignment -%}
 
 {%- if products_to_compare.size > 0 -%}
-  <div class="product-comparison" data-section-id="{{ section.id }}">
+  <div style="max-width: 90%; margin: 0 auto;" data-section-id="{{ section.id }}">
     <div class="ml-4 mb-4 text-{{ align }}">
       <h3 class="text-2xl" style="color: {{ subheading_color }};">
         {{ section.settings.sub_heading }}
@@ -70,106 +70,103 @@
           </thead>
           <tbody>
             {% for block in section.blocks %}
-              <tr class="align-top">
-                <th
-                  style="width: {{ 100.0 | divided_by: 6 }}%;"
-                  class="bg-white p-3 text-left align-top break-words border-t border-[#e0e0e0] p-[1%] max-lg:hidden"
-                >
-                  {% case block.type %}
-                    {% when 'description' %}
-                      {{ block.settings.description_title }}
-                    {% when 'inventory_status' %}
-                      {{ block.settings.inventory_status_title }}
-                    {% when 'vendor' %}
-                      {{ block.settings.vendor_title }}
-                    {% when 'variant_option' %}
-                      {{ block.settings.variant_option_title }}
-                    {% when 'sku' %}
-                      {{ block.settings.sku_title }}
-                    {% when 'product_metafield' %}
-                      {{ block.settings.product_metafield_title }}
-                    {% else %}
-                      {{ block.type | capitalize }}
-                  {% endcase %}
-                </th>
-
-                {% for product in products_to_compare %}
-                  <td
+              {% unless block.type == 'view_detail' %}
+                <tr class="align-top">
+                  <th
                     style="width: {{ 100.0 | divided_by: 6 }}%;"
-                    class="bg-[#F5F5F5] p-3 align-top break-words border-t border-r border-[#e0e0e0] p-[1%]"
+                    class="bg-white p-3 text-left align-top break-words border-t border-[#e0e0e0] p-[1%] max-lg:hidden"
                   >
-                    {%- case block.type -%}
-                      {%- when 'description' -%}
-                        {%- if product.description != blank -%}
-                          <p class="lg:hidden font-bold mb-2">{{ block.settings.description_title }}</p>
-                          {{- product.description | strip_html | truncatewords: 15 -}}
-                        {%- else -%}
-                          {{- section.settings.empty_field_text -}}
-                        {%- endif -%}
+                    {% case block.type %}
+                      {% when 'description' %}
+                        {{ block.settings.description_title }}
+                      {% when 'inventory_status' %}
+                        {{ block.settings.inventory_status_title }}
+                      {% when 'vendor' %}
+                        {{ block.settings.vendor_title }}
+                      {% when 'variant_option' %}
+                        {{ block.settings.variant_option_title }}
+                      {% when 'sku' %}
+                        {{ block.settings.sku_title }}
+                      {% when 'product_metafield' %}
+                        {{ block.settings.product_metafield_title }}
+                    {% endcase %}
+                  </th>
 
-                      {%- when 'inventory_status' -%}
-                        <p class="lg:hidden font-bold mb-2">{{ block.settings.inventory_status_title }}</p>
-                        {%- if product.available -%}
-                          {{ 'products.product.inventory_in_stock' | t }}
-                        {%- else -%}
-                          {{ 'products.product.inventory_out_of_stock' | t }}
-                        {%- endif -%}
-
-                      {%- when 'vendor' -%}
-                        <p class="lg:hidden font-bold mb-2">{{ block.settings.vendor_title }}</p>
-                        {%- if product.vendor != blank -%}
-                          {{- product.vendor -}}
-                        {%- else -%}
-                          {{- section.settings.empty_field_text -}}
-                        {%- endif -%}
-
-                      {%- when 'sku' -%}
-                        <p class="lg:hidden font-bold mb-2">{{ block.settings.sku_title }}</p>
-                        {%- assign variant = product.selected_or_first_available_variant -%}
-                        {%- if variant.sku != blank -%}
-                          {{- variant.sku -}}
-                        {%- else -%}
-                          {{- section.settings.empty_field_text -}}
-                        {%- endif -%}
-
-                      {%- when 'product_metafield' -%}
-                        <p class="lg:hidden font-bold mb-2">{{ block.settings.product_metafield_title }}</p>
-                        {%- assign metafield_key = block.settings.metafield_key -%}
-                        {%- assign parts = metafield_key | split: '.' -%}
-                        {%- if parts.size == 2 -%}
-                          {%- assign namespace = parts[0] -%}
-                          {%- assign key = parts[1] -%}
-                          {%- assign meta_value = product.metafields[namespace][key] -%}
-                          {%- if meta_value.value != blank -%}
-                            {{- meta_value.value -}}
+                  {% for product in products_to_compare %}
+                    <td
+                      style="width: {{ 100.0 | divided_by: 6 }}%;"
+                      class="bg-[#F5F5F5] p-3 align-top break-words border-t border-r border-[#e0e0e0] p-[1%]"
+                    >
+                      {%- case block.type -%}
+                        {%- when 'description' -%}
+                          {%- if product.description != blank -%}
+                            <p class="lg:hidden font-bold mb-2">{{ block.settings.description_title }}</p>
+                            {{- product.description | strip_html | truncatewords: 15 -}}
                           {%- else -%}
                             {{- section.settings.empty_field_text -}}
                           {%- endif -%}
-                        {%- else -%}
-                          {{- section.settings.empty_field_text -}}
-                        {%- endif -%}
 
-                      {%- when 'variant_option' -%}
-                        <p class="lg:hidden font-bold mb-2">{{ block.settings.variant_option_title }}</p>
-                        {%- assign option_name = block.settings.variant_option_title -%}
-                        {%- assign found_option = false -%}
-                        {%- for option in product.options_with_values -%}
-                          {%- if option.name == option_name -%}
-                            {{- option.values | join: ', ' -}}
-                            {%- assign found_option = true -%}
-                            {%- break -%}
+                        {%- when 'inventory_status' -%}
+                          <p class="lg:hidden font-bold mb-2">{{ block.settings.inventory_status_title }}</p>
+                          {%- if product.available -%}
+                            {{ 'products.product.inventory_in_stock' | t }}
+                          {%- else -%}
+                            {{ 'products.product.inventory_out_of_stock' | t }}
                           {%- endif -%}
-                        {%- endfor -%}
-                        {%- unless found_option -%}
-                          {{- section.settings.empty_field_text -}}
-                        {%- endunless -%}
 
-                      {%- else -%}
-                        {{- section.settings.empty_field_text -}}
-                    {%- endcase -%}
-                  </td>
-                {% endfor %}
-              </tr>
+                        {%- when 'vendor' -%}
+                          <p class="lg:hidden font-bold mb-2">{{ block.settings.vendor_title }}</p>
+                          {%- if product.vendor != blank -%}
+                            {{- product.vendor -}}
+                          {%- else -%}
+                            {{- section.settings.empty_field_text -}}
+                          {%- endif -%}
+
+                        {%- when 'sku' -%}
+                          <p class="lg:hidden font-bold mb-2">{{ block.settings.sku_title }}</p>
+                          {%- assign variant = product.selected_or_first_available_variant -%}
+                          {%- if variant.sku != blank -%}
+                            {{- variant.sku -}}
+                          {%- else -%}
+                            {{- section.settings.empty_field_text -}}
+                          {%- endif -%}
+
+                        {%- when 'product_metafield' -%}
+                          <p class="lg:hidden font-bold mb-2">{{ block.settings.product_metafield_title }}</p>
+                          {%- assign metafield_key = block.settings.metafield_key -%}
+                          {%- assign parts = metafield_key | split: '.' -%}
+                          {%- if parts.size == 2 -%}
+                            {%- assign namespace = parts[0] -%}
+                            {%- assign key = parts[1] -%}
+                            {%- assign meta_value = product.metafields[namespace][key] -%}
+                            {%- if meta_value.value != blank -%}
+                              {{- meta_value.value -}}
+                            {%- else -%}
+                              {{- section.settings.empty_field_text -}}
+                            {%- endif -%}
+                          {%- else -%}
+                            {{- section.settings.empty_field_text -}}
+                          {%- endif -%}
+
+                        {%- when 'variant_option' -%}
+                          <p class="lg:hidden font-bold mb-2">{{ block.settings.variant_option_title }}</p>
+                          {%- assign option_name = block.settings.variant_option_title -%}
+                          {%- assign found_option = false -%}
+                          {%- for option in product.options_with_values -%}
+                            {%- if option.name == option_name -%}
+                              {{- option.values | join: ', ' -}}
+                              {%- assign found_option = true -%}
+                              {%- break -%}
+                            {%- endif -%}
+                          {%- endfor -%}
+                          {%- unless found_option -%}
+                            {{- section.settings.empty_field_text -}}
+                          {%- endunless -%}
+                      {%- endcase -%}
+                    </td>
+                  {% endfor %}
+                </tr>
+              {% endunless %}
             {% endfor %}
           </tbody>
           <tfoot>
@@ -415,6 +412,7 @@
     {
       "type": "sku",
       "name": "SKU",
+      "limit": 1,
       "settings": [
         {
           "type": "text",
@@ -439,6 +437,19 @@
           "id": "metafield_key",
           "label": "Metafield key",
           "info": "Enter a product metafield key. For example: custom.use_conditions"
+        }
+      ]
+    },
+    {
+      "type": "view_detail",
+      "name": "View full details",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "view_detail_title",
+          "label": "Title",
+          "default": "View full details"
         }
       ]
     }
