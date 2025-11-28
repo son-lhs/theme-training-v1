@@ -7,187 +7,226 @@
 
 {%- if products_to_compare.size > 0 -%}
   <div class="product-comparison" data-section-id="{{ section.id }}">
-    <div class="ml-4 text-{{ align }}">
-      <h2 class="text-4xl" style="color: {{ heading_color }};">
-        {{ section.settings.heading }}
-      </h2>
-
+    <div class="ml-4 mb-4 text-{{ align }}">
       <h3 class="text-2xl" style="color: {{ subheading_color }};">
         {{ section.settings.sub_heading }}
       </h3>
+
+      <h2 class="text-4xl" style="color: {{ heading_color }};">
+        {{ section.settings.heading }}
+      </h2>
     </div>
 
-    <table style="margin: auto;">
-      <thead>
-        <tr>
-          <th class="product-comparison-header-cell !bg-white w-[233px]">
-            <div class="w-[233px] h-[233px] bg-white"></div>
-          </th>
+    {%- assign total_columns = 1 | plus: products_to_compare.size -%}
+    {%- if total_columns > 6 -%}
+      {%- assign total_columns = 6 -%}
+    {%- endif -%}
+    {%- assign table_size = total_columns | times: 100 -%}
+    {%- assign table_size = table_size | divided_by: 6.0 -%}
+    <div class="overflow-x-auto">
+      <div class="inline-block">
+        <table
+          class="m-auto table-fixed inline-block max-w-full comparison-table"
+          style="border-collapse: separate; border-spacing: 0; --dynamic-width: {{ table_size }}%;"
+        >
+          <thead>
+            <tr>
+              <th
+                class="product-comparison-header-cell !bg-white p-0 w-full aspect-square bg-white flex items-center justify-center overflow-hidden border-t  border-[#e0e0e0] rounded-xl p-[15%] max-lg:hidden"
+                style="vertical-align: top;"
+              >
+                {{- 'plus.svg' | inline_asset_content -}}
+              </th>
 
-          {% for product in products_to_compare %}
-            <th
-              class="product-comparison-product-cell !bg-[#F5F5F5] text-center p-0"
-              style="vertical-align: top;"
-            >
-              <div class="flex flex-col items-center my-5">
-                <div class="w-[233px] h-[233px] bg-white p-16 flex items-center justify-center overflow-hidden rounded-xl">
-                  <img
-                    src="{{ product.featured_image | image_url: width: 233 }}"
-                    alt="{{ product.title }}"
-                    class="w-[233px] h-auto object-contain"
-                    loading="lazy"
+              {% for product in products_to_compare %}
+                <th
+                  class="product-comparison-product-cell !bg-[#F5F5F5] text-center p-0 rounded-tl-xl rounded-tr-xl overflow-hidden border-r border-t border-[#e0e0e0]"
+                  style="vertical-align: top;"
+                >
+                  <div class="flex flex-col items-start  p-[5%]">
+                    <div class="w-full aspect-square bg-white flex items-center justify-center overflow-hidden rounded-xl p-[15%]">
+                      <img
+                        src="{{ product.featured_image | image_url: width: 500 }}"
+                        alt="{{ product.title }}"
+                        class="max-w-full max-h-full object-contain"
+                        loading="lazy"
+                        width="500"
+                        height="500"
+                      >
+                    </div>
+
+                    <div class="text-left w-[200px]">
+                      <div class="font-semibold text-2xl mb-1 mt-10 break-words">
+                        {{ product.title }}
+                      </div>
+                      <div class="font-bold mt-4 text-2xl">
+                        {{ product.price | money }}
+                      </div>
+                    </div>
+                  </div>
+                </th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for block in section.blocks %}
+              <tr class="align-top">
+                <th
+                  style="width: {{ 100.0 | divided_by: 6 }}%;"
+                  class="bg-white p-3 text-left align-top break-words border-t border-[#e0e0e0] p-[1%] max-lg:hidden"
+                >
+                  {% case block.type %}
+                    {% when 'description' %}
+                      {{ block.settings.description_title }}
+                    {% when 'inventory_status' %}
+                      {{ block.settings.inventory_status_title }}
+                    {% when 'vendor' %}
+                      {{ block.settings.vendor_title }}
+                    {% when 'variant_option' %}
+                      {{ block.settings.variant_option_title }}
+                    {% when 'sku' %}
+                      {{ block.settings.sku_title }}
+                    {% when 'product_metafield' %}
+                      {{ block.settings.product_metafield_title }}
+                    {% else %}
+                      {{ block.type | capitalize }}
+                  {% endcase %}
+                </th>
+
+                {% for product in products_to_compare %}
+                  <td
+                    style="width: {{ 100.0 | divided_by: 6 }}%;"
+                    class="bg-[#F5F5F5] p-3 align-top break-words border-t border-r border-[#e0e0e0] p-[1%]"
                   >
-                </div>
+                    {%- case block.type -%}
+                      {%- when 'description' -%}
+                        {%- if product.description != blank -%}
+                          <p class="lg:hidden font-bold mb-2">{{ block.settings.description_title }}</p>
+                          {{- product.description | strip_html | truncatewords: 15 -}}
+                        {%- else -%}
+                          {{- section.settings.empty_field_text -}}
+                        {%- endif -%}
 
-                <div class="text-left w-[233px]">
-                  <div class="font-semibold text-2xl mb-1 mt-2 break-words">
-                    {{ product.title }}
-                  </div>
-                  <div class="font-bold text-2xl">
-                    {{ product.price | money }}
-                  </div>
-                </div>
-              </div>
-            </th>
-          {% endfor %}
-        </tr>
-      </thead>
-      <tbody>
-        {% for block in section.blocks %}
-          <tr class="align-top">
-            <th class="bg-white w-[280px] p-3 text-left align-top">
-              {% case block.type %}
-                {% when 'description' %}
-                  {{ block.settings.description_title }}
-                {% when 'inventory_status' %}
-                  {{ block.settings.inventory_status_title }}
-                {% when 'vendor' %}
-                  {{ block.settings.vendor_title }}
-                {% when 'variant_option' %}
-                  {{ block.settings.variant_option_title }}
-                {% when 'sku' %}
-                  {{ block.settings.sku_title }}
-                {% when 'product_metafield' %}
-                  {{ block.settings.product_metafield_title }}
-                {% else %}
-                  {{ block.type | capitalize }}
-              {% endcase %}
-            </th>
+                      {%- when 'inventory_status' -%}
+                        <p class="lg:hidden font-bold mb-2">{{ block.settings.inventory_status_title }}</p>
+                        {%- if product.available -%}
+                          {{ 'products.product.inventory_in_stock' | t }}
+                        {%- else -%}
+                          {{ 'products.product.inventory_out_of_stock' | t }}
+                        {%- endif -%}
 
-            {% for product in products_to_compare %}
-              <td class="bg-[#F5F5F5] w-[280px] p-3 align-top break-words">
-                {%- case block.type -%}
-                  {%- when 'description' -%}
-                    {%- if product.description != blank -%}
-                      {{- product.description | strip_html | truncatewords: 15 -}}
-                    {%- else -%}
-                      {{- section.settings.empty_field_text -}}
-                    {%- endif -%}
+                      {%- when 'vendor' -%}
+                        <p class="lg:hidden font-bold mb-2">{{ block.settings.vendor_title }}</p>
+                        {%- if product.vendor != blank -%}
+                          {{- product.vendor -}}
+                        {%- else -%}
+                          {{- section.settings.empty_field_text -}}
+                        {%- endif -%}
 
-                  {%- when 'inventory_status' -%}
-                    {%- if product.available -%}
-                      {{ 'products.product.inventory_in_stock' | t }}
-                    {%- else -%}
-                      {{ 'products.product.inventory_out_of_stock' | t }}
-                    {%- endif -%}
+                      {%- when 'sku' -%}
+                        <p class="lg:hidden font-bold mb-2">{{ block.settings.sku_title }}</p>
+                        {%- assign variant = product.selected_or_first_available_variant -%}
+                        {%- if variant.sku != blank -%}
+                          {{- variant.sku -}}
+                        {%- else -%}
+                          {{- section.settings.empty_field_text -}}
+                        {%- endif -%}
 
-                  {%- when 'vendor' -%}
-                    {%- if product.vendor != blank -%}
-                      {{- product.vendor -}}
-                    {%- else -%}
-                      {{- section.settings.empty_field_text -}}
-                    {%- endif -%}
+                      {%- when 'product_metafield' -%}
+                        <p class="lg:hidden font-bold mb-2">{{ block.settings.product_metafield_title }}</p>
+                        {%- assign metafield_key = block.settings.metafield_key -%}
+                        {%- assign parts = metafield_key | split: '.' -%}
+                        {%- if parts.size == 2 -%}
+                          {%- assign namespace = parts[0] -%}
+                          {%- assign key = parts[1] -%}
+                          {%- assign meta_value = product.metafields[namespace][key] -%}
+                          {%- if meta_value.value != blank -%}
+                            {{- meta_value.value -}}
+                          {%- else -%}
+                            {{- section.settings.empty_field_text -}}
+                          {%- endif -%}
+                        {%- else -%}
+                          {{- section.settings.empty_field_text -}}
+                        {%- endif -%}
 
-                  {%- when 'sku' -%}
-                    {%- assign variant = product.selected_or_first_available_variant -%}
-                    {%- if variant.sku != blank -%}
-                      {{- variant.sku -}}
-                    {%- else -%}
-                      {{- section.settings.empty_field_text -}}
-                    {%- endif -%}
+                      {%- when 'variant_option' -%}
+                        <p class="lg:hidden font-bold mb-2">{{ block.settings.variant_option_title }}</p>
+                        {%- assign option_name = block.settings.variant_option_title -%}
+                        {%- assign found_option = false -%}
+                        {%- for option in product.options_with_values -%}
+                          {%- if option.name == option_name -%}
+                            {{- option.values | join: ', ' -}}
+                            {%- assign found_option = true -%}
+                            {%- break -%}
+                          {%- endif -%}
+                        {%- endfor -%}
+                        {%- unless found_option -%}
+                          {{- section.settings.empty_field_text -}}
+                        {%- endunless -%}
 
-                  {%- when 'product_metafield' -%}
-                    {%- assign metafield_key = block.settings.metafield_key -%}
-                    {%- assign parts = metafield_key | split: '.' -%}
-                    {%- if parts.size == 2 -%}
-                      {%- assign namespace = parts[0] -%}
-                      {%- assign key = parts[1] -%}
-                      {%- assign meta_value = product.metafields[namespace][key] -%}
-                      {%- if meta_value.value != blank -%}
-                        {{- meta_value.value -}}
                       {%- else -%}
                         {{- section.settings.empty_field_text -}}
-                      {%- endif -%}
-                    {%- else -%}
-                      {{- section.settings.empty_field_text -}}
-                    {%- endif -%}
-
-                  {%- when 'variant_option' -%}
-                    {%- assign option_name = block.settings.variant_option_title -%}
-                    {%- assign found_option = false -%}
-                    {%- for option in product.options_with_values -%}
-                      {%- if option.name == option_name -%}
-                        {{- option.values | join: ', ' -}}
-                        {%- assign found_option = true -%}
-                        {%- break -%}
-                      {%- endif -%}
-                    {%- endfor -%}
-                    {%- unless found_option -%}
-                      {{- section.settings.empty_field_text -}}
-                    {%- endunless -%}
-
-                  {%- else -%}
-                    {{- section.settings.empty_field_text -}}
-                {%- endcase -%}
-              </td>
+                    {%- endcase -%}
+                  </td>
+                {% endfor %}
+              </tr>
             {% endfor %}
-          </tr>
-        {% endfor %}
-      </tbody>
-      <tfoot>
-        <tr>
-          <th class="bg-white w-[280px]"></th>
-
-          {% for product in products_to_compare %}
-            {%- assign variant = product.selected_or_first_available_variant -%}
-            <td class="w-[280px] bg-white p-3 text-center align-top space-y-2">
-              <div x-data="customAddToCartForm({{ product.id }}, {{ variant.id }}, {{ variant.available | json }})">
-                {%- form 'product', product, id: product.id, class: 'form', novalidate: 'novalidate' -%}
-                  <input type="hidden" name="id" x-bind:value="selectedVariantId">
-                  <input type="hidden" name="quantity" value="1">
-
-                  <button
-                    type="submit"
-                    @click.prevent="submitCart($el.closest('form'))"
-                    x-bind:disabled="loading || !variantAvailable"
-                    class="
-                      w-full text-white font-medium rounded-lg text-xl px-5 py-2.5 mb-2
-                      bg-green-700 hover:bg-green-800
-                      disabled:bg-gray-400 disabled:text-white disabled:cursor-not-allowed
-                    "
+          </tbody>
+          <tfoot>
+            <tr>
+              <th
+                style="width: {{ 100.0 | divided_by: 6 }}%;"
+                class="rounded-bl-xl rounded-br-xl  overflow-hidden border-y border-[#e0e0e0] max-lg:hidden"
+              ></th>
+              {% for product in products_to_compare %}
+                {%- assign variant = product.selected_or_first_available_variant -%}
+                <td
+                  style="width: {{ 100.0 | divided_by: 6 }}%;"
+                  class="bg-[#F5F5F5] text-center align-top space-y-2 rounded-bl-xl rounded-br-xl  overflow-hidden border-r border-t border-b border-[#e0e0e0] p-3"
+                >
+                  <div
+                    class="max-lg:hidden"
+                    x-data="customAddToCartForm({{ product.id }}, {{ variant.id }}, {{ variant.available | json }})"
                   >
-                    <span x-show="!soldOutMessage && !loading">
-                      {% if variant == null or variant.available == false %}
-                        {{ 'products.product.sold_out' | t }}
-                      {% else %}
-                        {{ 'products.product.add_to_cart' | t }}
-                      {% endif %}
-                    </span>
-                    <span x-show="soldOutMessage" x-text="soldOutMessage"></span>
-                    <span x-show="loading">Adding...</span>
-                  </button>
-                {%- endform -%}
+                    {%- form 'product', product, id: product.id, class: 'form', novalidate: 'novalidate' -%}
+                      <input type="hidden" name="id" x-bind:value="selectedVariantId">
+                      <input type="hidden" name="quantity" value="1">
 
-                <div x-show="errorMessage" class="text-red-600 text-sm mt-1" x-text="errorMessage"></div>
+                      <button
+                        type="submit"
+                        @click.prevent="submitCart($el.closest('form'))"
+                        x-bind:disabled="loading || !variantAvailable"
+                        class="
+                          w-full text-white font-medium rounded-lg text-xl px-5 py-2.5 mb-2
+                          bg-green-700 hover:bg-green-800
+                          disabled:bg-gray-400 disabled:text-white disabled:cursor-not-allowed
+                        "
+                      >
+                        <span x-show="!soldOutMessage && !loading">
+                          {% if variant == null or variant.available == false %}
+                            {{ 'products.product.sold_out' | t }}
+                          {% else %}
+                            {{ 'products.product.add_to_cart' | t }}
+                          {% endif %}
+                        </span>
+                        <span x-show="soldOutMessage" x-text="soldOutMessage"></span>
+                        <span x-show="loading">Adding...</span>
+                      </button>
+                    {%- endform -%}
 
-                {% comment %} modal view detail {% endcomment %}
-              </div>
-              {% render 'product-comparison-detail-modal', product: product, section: section, cart: cart %}
-            </td>
-          {% endfor %}
-        </tr>
-      </tfoot>
-    </table>
+                    <div x-show="errorMessage" class="text-red-600 text-sm mt-1" x-text="errorMessage"></div>
+
+                    {% comment %} modal view detail {% endcomment %}
+                  </div>
+                  {% render 'product-comparison-detail-modal', product: product, section: section, cart: cart %}
+                </td>
+              {% endfor %}
+              >
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
   </div>
 {%- endif -%}
 

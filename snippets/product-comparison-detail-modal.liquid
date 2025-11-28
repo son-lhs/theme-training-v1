@@ -21,12 +21,19 @@
   <button
     @click="openModal()"
     type="button"
-    class="underline text-xl text-gray-500"
+    class="lg:inline hidden text-xl underline text-gray-500"
   >
     View Details
   </button>
 
-  <!-- Overlay -->
+  <button
+    @click="openModal()"
+    type="button"
+    class="lg:hidden w-full bg-green-700 text-white py-2 px-4 rounded-lg font-medium text-xl"
+  >
+    View Product
+  </button>
+
   <div
     x-cloak
     x-show="modalIsOpen"
@@ -41,7 +48,6 @@
     @click.self="modalIsOpen = false"
     class="fixed inset-0 z-50 overflow-y-auto bg-black/40 p-4 sm:p-6 lg:p-8 backdrop-blur-sm"
   >
-    <!-- Modal Dialog - scrollable if content too tall -->
     <div
       x-show="modalIsOpen"
       x-transition:enter="ease-out duration-300"
@@ -56,13 +62,11 @@
         class="w-full max-w-4xl bg-white rounded-xl shadow-xl overflow-hidden"
         style="max-height: calc(100vh - 4rem);"
       >
-        <!-- Header -->
         <div class="flex justify-between items-center p-4 border-b">
           <h2 class="text-xl font-bold">{{ product.title }}</h2>
           <button @click="modalIsOpen = false" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
         </div>
 
-        <!-- Scrollable Body -->
         <div
           class="overflow-y-auto p-6"
           style="max-height: calc(100vh - 120px);"
