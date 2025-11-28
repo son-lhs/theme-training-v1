@@ -1,5 +1,16 @@
-{%- assign products_to_compare = section.settings.products | where: 'available', true -%}
+{%- if section.settings.collection != blank -%}
+  {%- assign collection_handle = section.settings.collection -%}
+  {%- assign collection = collections[collection_handle] -%}
+  {%- assign all_products = collection.products -%}
+{%- else -%}
+  {%- assign all_products = section.settings.products -%}
+{%- endif -%}
+
+{%- assign products_to_compare = all_products | where: 'available', true -%}
 {%- assign max_products = section.settings.limit_products | default: 5 -%}
+{%- if max_products > 5 -%}
+  {%- assign max_products = 5 -%}
+{%- endif -%}
 {%- assign products_to_compare = products_to_compare | slice: 0, max_products -%}
 {%- assign heading_color = section.settings.color_heading -%}
 {%- assign subheading_color = section.settings.color_subheading -%}

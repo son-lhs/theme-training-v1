@@ -49,6 +49,8 @@
         alt="{{ product.title | escape }}"
         class="w-full h-auto object-contain"
         loading="lazy"
+        width="400"
+        height="auto"
       >
     </div>
   </div>
@@ -87,12 +89,13 @@
           {%- endif -%}
         </p>
       {%- endif -%}
-
-      <product-form>
-        {%- form 'product', product, id: product_form_id, class: 'form', novalidate: 'novalidate' -%}
+      {%- assign variant = product.selected_or_first_available_variant -%}
+      <div
+        class="max-lg:hidden"
+        x-data="customAddToCartForm({{ product.id }}, {{ variant.id }}, {{ variant.available | json }})"
+      >
+        {%- form 'product', product, id: product.id, class: 'form', novalidate: 'novalidate' -%}
           <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
-          <input type="hidden" name="quantity" value="1">
-
           <div class="price-per-item__container">
             <quantity-input class="quantity" data-url="{{ product.url }}" data-section="modal">
               <button class="quantity__button" name="minus" type="button">
@@ -119,15 +122,27 @@
 
           <button
             type="submit"
-            name="add"
-            class="product-form__submit button button--secondary w-full mt-4"
+            @click.prevent="submitCart($el.closest('form'))"
+            x-bind:disabled="loading || !variantAvailable"
+            class="
+              w-full text-white font-medium rounded-lg text-xl px-5 py-2.5 mb-2 mt-4
+              bg-green-700 hover:bg-green-800
+              disabled:bg-gray-400 disabled:text-white disabled:cursor-not-allowed
+            "
           >
-            {{ 'products.product.add_to_cart' | t }}
+            <span x-show="!soldOutMessage && !loading">
+              {% if variant == null or variant.available == false %}
+                {{ 'products.product.sold_out' | t }}
+              {% else %}
+                {{ 'products.product.add_to_cart' | t }}
+              {% endif %}
+            </span>
+            <span x-show="soldOutMessage" x-text="soldOutMessage"></span>
+            <span x-show="loading">Adding...</span>
           </button>
           {{ form | payment_button }}
         {%- endform -%}
-      </product-form>
-
+      </div>
       {%- if product.description != blank -%}
         <div class="product__description text-left">
           {{ product.description }}
