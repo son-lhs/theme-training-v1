@@ -14,10 +14,28 @@
 {%- assign products_to_compare = products_to_compare | slice: 0, max_products -%}
 {%- assign heading_color = section.settings.color_heading -%}
 {%- assign subheading_color = section.settings.color_subheading -%}
+{%- assign color_text = section.settings.color_text -%}
 {%- assign align = section.settings.heading_alignment -%}
 
 {%- if products_to_compare.size > 0 -%}
-  <div style="max-width: 90%; margin: 0 auto;" data-section-id="{{ section.id }}">
+  <div
+    style="
+      max-width: 90%;
+      margin: 0 auto;
+      padding-top: {{ section.settings.desktop_padding_top | default: 28 }}px;
+      padding-bottom: {{ section.settings.desktop_padding_bottom | default: 28 }}px;
+    "
+    class="md:pt-0 md:pb-0"
+    data-section-id="{{ section.id }}"
+  >
+    <style>
+      @media (max-width: 767px) {
+        [data-section-id="{{ section.id }}"] {
+          padding-top: {{ section.settings.mobile_padding_top | default: 28 }}px !important;
+          padding-bottom: {{ section.settings.mobile_padding_bottom | default: 28 }}px !important;
+        }
+      }
+    </style>
     <div class="ml-4 mb-4 text-{{ align }}">
       <h3 class="text-2xl" style="color: {{ subheading_color }};">
         {{ section.settings.sub_heading }}
@@ -26,6 +44,10 @@
       <h2 class="text-4xl" style="color: {{ heading_color }};">
         {{ section.settings.heading }}
       </h2>
+
+      <h6 class="text-base" style="color: {{ color_text }};">
+        {{ section.settings.text }}
+      </h6>
     </div>
 
     {%- assign total_columns = 1 | plus: products_to_compare.size -%}
@@ -35,9 +57,9 @@
     {%- assign table_size = total_columns | times: 100 -%}
     {%- assign table_size = table_size | divided_by: 6.0 -%}
     <div class="overflow-x-auto">
-      <div class="inline-block">
+      <div class="max-lg:inline-block">
         <table
-          class="m-auto table-fixed inline-block max-w-full comparison-table"
+          class="m-auto table-fixed max-lg:inline-block max-w-full comparison-table"
           style="border-collapse: separate; border-spacing: 0; --dynamic-width: {{ table_size }}%;"
         >
           <thead>
@@ -70,8 +92,13 @@
                       <div class="font-semibold text-2xl mb-1 mt-10 break-words">
                         {{ product.title }}
                       </div>
-                      <div class="font-bold mt-4 text-2xl">
-                        {{ product.price | money }}
+                      <div class="mt-4">
+                        {% render 'price',
+                          product: product,
+                          use_variant: true,
+                          show_badges: true,
+                          price_class: 'price--large'
+                        %}
                       </div>
                     </div>
                   </div>
@@ -85,7 +112,7 @@
                 <tr class="align-top">
                   <th
                     style="width: {{ 100.0 | divided_by: 6 }}%;"
-                    class="bg-white p-3 text-left align-top break-words border-t border-[#e0e0e0] p-[1%] max-lg:hidden"
+                    class="bg-white p-3 text-left align-top break-words border-t border-[#e0e0e0] p-[1%] max-lg:hidden min-w-[180px]"
                   >
                     {% case block.type %}
                       {% when 'description' %}
@@ -193,7 +220,6 @@
                   class="bg-[#F5F5F5] text-center align-top space-y-2 rounded-bl-xl rounded-br-xl  overflow-hidden border-r border-t border-b border-[#e0e0e0] p-3"
                 >
                   <div
-                    class="max-lg:hidden"
                     x-data="customAddToCartForm({{ product.id }}, {{ variant.id }}, {{ variant.available | json }})"
                   >
                     {%- form 'product', product, id: product.id, class: 'form', novalidate: 'novalidate' -%}
@@ -223,13 +249,10 @@
                     {%- endform -%}
 
                     <div x-show="errorMessage" class="text-red-600 text-sm mt-1" x-text="errorMessage"></div>
-
-                    {% comment %} modal view detail {% endcomment %}
                   </div>
                   {% render 'product-comparison-detail-modal', product: product, section: section, cart: cart %}
                 </td>
               {% endfor %}
-              >
             </tr>
           </tfoot>
         </table>
@@ -240,21 +263,21 @@
 
 {% schema %}
 {
-  "name": "Product comparison",
+  "name": "t:sections.product_comparison.name",
   "class": "overlay-section",
   "limit": 1,
   "settings": [
     {
       "type": "text",
       "id": "sub_heading",
-      "label": "Subheading",
-      "default": "Subheading"
+      "label": "t:sections.product_comparison.settings.sub_heading.label",
+      "default": "t:sections.product_comparison.settings.sub_heading.default"
     },
     {
       "type": "text",
       "id": "heading",
-      "label": "Heading",
-      "default": "Product comparison"
+      "label": "t:sections.product_comparison.settings.heading.label",
+      "default": "t:sections.product_comparison.settings.heading.default"
     },
     {
       "type": "select",
@@ -262,45 +285,45 @@
       "options": [
         {
           "value": "left",
-          "label": "Left"
+          "label": "t:sections.product_comparison.settings.heading_alignment.options__1.label"
         },
         {
           "value": "center",
-          "label": "Center"
+          "label": "t:sections.product_comparison.settings.heading_alignment.options__2.label"
         },
         {
           "value": "right",
-          "label": "Right"
+          "label": "t:sections.product_comparison.settings.heading_alignment.options__3.label"
         }
       ],
       "default": "left",
-      "label": "Heading alignment"
+      "label": "t:sections.product_comparison.settings.heading_alignment.label"
     },
     {
       "type": "richtext",
       "id": "text",
-      "label": "Text",
-      "default": "<p>Describe you product comparison grid.</p>"
+      "label": "t:sections.product_comparison.settings.text.label",
+      "default": "t:sections.product_comparison.settings.text.default"
     },
     {
       "type": "header",
-      "content": "Grid"
+      "content": "t:sections.product_comparison.settings.header__grid.content"
     },
     {
       "type": "product_list",
       "id": "products",
       "limit": 5,
-      "label": "Select products"
+      "label": "t:sections.product_comparison.settings.select_product.label"
     },
     {
       "type": "collection",
       "id": "collection",
-      "label": "Collections"
+      "label": "t:sections.product_comparison.settings.collections.label"
     },
     {
       "type": "text",
       "id": "empty_field_text",
-      "label": "Text to use for empty fields",
+      "label": "t:sections.product_comparison.settings.empty_field_text.label",
       "default": "\"-\""
     },
     {
@@ -308,19 +331,19 @@
       "min": 1,
       "max": 5,
       "id": "limit_products",
-      "label": "Limit product to shows",
+      "label": "t:sections.product_comparison.settings.limit_products.label",
       "default": 5
     },
     {
       "type": "header",
-      "content": "Section layout"
+      "content": "t:sections.all.padding.section_padding_heading"
     },
     {
       "type": "range",
       "min": 0,
       "max": 100,
       "id": "desktop_padding_top",
-      "label": "Desktop padding top",
+      "label": "t:sections.all.padding.padding_top",
       "default": 28
     },
     {
@@ -328,7 +351,7 @@
       "min": 0,
       "max": 100,
       "id": "desktop_padding_bottom",
-      "label": "Desktop padding bottom",
+      "label": "t:sections.all.padding.padding_bottom",
       "default": 28
     },
     {
@@ -336,7 +359,7 @@
       "min": 0,
       "max": 100,
       "id": "mobile_padding_top",
-      "label": "Mobile padding top",
+      "label": "t:sections.product_comparison.settings.padding.padding_top_mobile",
       "default": 28
     },
     {
@@ -344,131 +367,131 @@
       "min": 0,
       "max": 100,
       "id": "mobile_padding_bottom",
-      "label": "Mobile padding bottom",
+      "label": "t:sections.product_comparison.settings.padding.padding_bottom_mobile",
       "default": 28
     },
     {
       "type": "header",
-      "content": "Colors"
+      "content": "t:sections.product_comparison.settings.colors.header"
     },
     {
       "type": "color",
       "id": "color_heading",
-      "label": "Color heading"
+      "label": "t:sections.product_comparison.settings.colors.color_heading"
     },
     {
       "type": "color",
       "id": "color_subheading",
-      "label": "Color subheading"
+      "label": "t:sections.product_comparison.settings.colors.color_sub_heading"
     },
     {
       "type": "color",
       "id": "color_text",
-      "label": "Color text"
+      "label": "t:sections.product_comparison.settings.colors.color_text"
     }
   ],
   "blocks": [
     {
       "type": "description",
-      "name": "Product description",
+      "name": "t:sections.product_comparison.blocks.description.name",
       "limit": 1,
       "settings": [
         {
           "type": "text",
           "id": "description_title",
-          "label": "Title",
-          "default": "Description"
+          "label": "t:sections.product_comparison.blocks.description.settings.label",
+          "default": "t:sections.product_comparison.blocks.description.settings.default"
         }
       ]
     },
     {
       "type": "inventory_status",
-      "name": "Inventory Status",
+      "name": "t:sections.product_comparison.blocks.inventory_status.name",
       "limit": 1,
       "settings": [
         {
           "type": "text",
           "id": "inventory_status_title",
-          "label": "Title",
-          "default": "Inventory Status"
+          "label": "t:sections.product_comparison.blocks.inventory_status.settings.label",
+          "default": "t:sections.product_comparison.blocks.inventory_status.settings.default"
         }
       ]
     },
     {
       "type": "vendor",
-      "name": "Vendor name",
+      "name": "t:sections.product_comparison.blocks.vendor.name",
       "limit": 1,
       "settings": [
         {
           "type": "text",
           "id": "vendor_title",
-          "label": "Title",
-          "default": "Vendor"
+          "label": "t:sections.product_comparison.blocks.vendor.settings.label",
+          "default": "t:sections.product_comparison.blocks.vendor.settings.default"
         }
       ]
     },
     {
       "type": "variant_option",
-      "name": "Variant option",
+      "name": "t:sections.product_comparison.blocks.variant_option.name",
       "settings": [
         {
           "type": "text",
           "id": "variant_option_title",
-          "label": "Title",
-          "default": "Color",
-          "info": "This should be the name of the variant option, such as 'Color'."
+          "label": "t:sections.product_comparison.blocks.variant_option.settings.label",
+          "default": "t:sections.product_comparison.blocks.variant_option.settings.default",
+          "info": "t:sections.product_comparison.blocks.variant_option.settings.info"
         }
       ]
     },
     {
       "type": "sku",
-      "name": "SKU",
+      "name": "t:sections.product_comparison.blocks.sku.name",
       "limit": 1,
       "settings": [
         {
           "type": "text",
           "id": "sku_title",
-          "label": "Title",
-          "default": "SKU"
+          "label": "t:sections.product_comparison.blocks.sku.settings.label",
+          "default": "t:sections.product_comparison.blocks.sku.settings.default"
         }
       ]
     },
     {
       "type": "product_metafield",
-      "name": "Product metafield",
+      "name": "t:sections.product_comparison.blocks.product_metafield.name",
       "settings": [
         {
           "type": "text",
           "id": "product_metafield_title",
-          "label": "Title",
-          "default": "Customizable title"
+          "label": "t:sections.product_comparison.blocks.product_metafield.settings.product_metafield.label",
+          "default": "t:sections.product_comparison.blocks.product_metafield.settings.product_metafield.default"
         },
         {
           "type": "text",
           "id": "metafield_key",
-          "label": "Metafield key",
-          "info": "Enter a product metafield key. For example: custom.use_conditions"
+          "label": "t:sections.product_comparison.blocks.product_metafield.settings.metafield_key.label",
+          "info": "t:sections.product_comparison.blocks.product_metafield.settings.metafield_key.info"
         }
       ]
     },
     {
       "type": "view_detail",
-      "name": "View full details",
+      "name": "t:sections.product_comparison.blocks.view_detail.name",
       "limit": 1,
       "settings": [
         {
           "type": "text",
           "id": "view_detail_title",
-          "label": "Title",
-          "default": "View full details"
+          "label": "t:sections.product_comparison.blocks.view_detail.settings.label",
+          "default": "t:sections.product_comparison.blocks.view_detail.settings.default"
         }
       ]
     }
   ],
   "presets": [
     {
-      "name": "Product comparison",
-      "category": "Product",
+      "name": "t:sections.product_comparison.presets.name",
+      "category": "t:sections.product_comparison.presets.category",
       "blocks": [
         {
           "type": "description"

@@ -48,7 +48,7 @@ document.addEventListener('alpine:init', () => {
       } catch (err) {
         this.errorMessage = 'Failed to add to cart. Please try again.';
         console.error('Fetch Error:', err);
-        // window.location = window.routes.cart_url;
+        window.location = window.routes.cart_url;
       } finally {
         this.loading = false;
       }

@@ -3410,6 +3410,126 @@
       "presets": {
         "name": "Collapsible content"
       }
+    },
+   "product_comparison": {
+      "name": "Product comparison",
+      "settings": {
+        "heading": {
+          "label": "Heading",
+          "default": "Product comparison"
+        },
+        "sub_heading": {
+          "label": "Subheading",
+          "default": "Subheading"
+        },
+        "heading_alignment": {
+          "label": "Heading alignment",
+          "options__1": {
+            "label": "Left"
+          },
+          "options__2": {
+            "label": "Center"
+          },
+          "options__3": {
+            "label": "Right"
+          }
+        },
+        "text": {
+          "label": "Text",
+          "default": "<p>Describe you product comparison grid.</p>"
+        },
+        "header__grid": {
+          "content": "Grid"
+        },
+        "select_product": {
+          "label": "Select products"
+        },
+        "collections": {
+          "label": "Collections"
+        },
+        "empty_field_text": {
+          "label": "Text to use for empty fields",
+          "default": "\"-\""
+        },
+        "limit_products": {
+          "label": "Limit product to shows"
+        },
+        "padding": {
+          "section_padding_heading": "Section padding",
+          "padding_top": "Desktop padding top",
+          "padding_bottom": "Desktop padding bottom",
+          "padding_top_mobile": "Mobile padding top",
+          "padding_bottom_mobile": "Mobile padding bottom"
+        },
+        "colors": {
+          "header": "Colors",
+          "color_heading": "Color heading",
+          "color_sub_heading": "Color subheading",
+          "color_text": "Color text"
+        }
+      },
+      "blocks": {
+        "description": {
+          "name": "Product description",
+          "settings": {
+            "label": "Title",
+            "default": "Description"
+          }
+        },
+        "inventory_status": {
+          "name": "Inventory status",
+          "settings": {
+            "label": "Title",
+            "default": "Inventory status"
+          }
+        },
+        "vendor": {
+          "name": "Vendor",
+          "settings": {
+            "label": "Title",
+            "default": "Vendor"
+          }
+        },
+        "variant_option": {
+          "name": "Variant option",
+          "settings": {
+            "label": "Title",
+            "default": "Color",
+            "info": "This should be the name of the variant option, such as 'Color'."
+          }
+        },
+        "sku": {
+          "name": "SKU",
+          "settings": {
+            "label": "Title",
+            "default": "SKU"
+          }
+        },
+        "product_metafield": {
+          "name": "Product metafield",
+          "settings": {
+            "product_metafield": {
+              "label": "Title",
+              "default": "Customizable title"
+            },
+            "metafield_key": {
+              "label": "Metafield key",
+              "info": "Enter a product metafield key. For example: custom.use_conditions"
+            }
+          }
+        },
+        "view_detail": {
+          "name": "View full details",
+          "settings": {
+            "label": "Title",
+            "default": "View full details"
+          }
+        }
+      },
+      "presets": {
+        "name": "Product comparison",
+        "category": "Product"
+      }
     }
   }
 }
